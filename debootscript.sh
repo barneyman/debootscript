@@ -11,7 +11,7 @@ print_usage() {
   Usage: $0 <options>
   Available options:
   -h                    print usage information
-  -b <root_device>      (mandatory) which block device to install to
+  -b <img>              (mandatory) name of img file
   -n <target_hostname>  hostname of target system
   -t <partition_type>   partition type to use ("gpt" or "mbr")
   -l                    use LVM
@@ -93,8 +93,8 @@ if [[ -z $root_device ]]; then
   echo 'Root device not set' >&2
   exit 1
 fi
-if [[ ! -b $root_device ]]; then
-  echo "Root block device ${root_device} not found" >&2
+if [[ -b $root_device ]]; then
+  echo "Root block device ${root_device} exists" >&2
   exit 1
 fi
 
@@ -131,8 +131,8 @@ fi
 # Install #
 ###########
 
-# Create partitions
-sfdisk --dump "${root_device}" || true
+# Create image file
+truncate -s 8G "${root_device}" || true
 
 if [[ $partition_type = gpt ]]; then
 
@@ -164,25 +164,29 @@ elif [[ $partition_type = mbr ]]; then
 
 fi
 
+LOOP_DEV="$(sudo losetup --show --find --partscan "$CM4_IMAGE_PATH")"
+echo "Created ${LOOP_DEV}"
+
+
 # LVM
 if [[ -v use_lvm ]]; then
-  pvcreate "${root_device}"2
-  vgcreate root_vg "${root_device}"2
+  pvcreate "${LOOP_DEV}"p2
+  vgcreate root_vg "${LOOP_DEV}"p2
   lvcreate -y -L 1G -n root_lv root_vg
 fi
 
 # Create filesystems
 if [[ $partition_type = gpt ]]; then
-  mkfs.fat -F32 "$root_device"1
+  mkfs.fat -F32 "$LOOP_DEV"p1
 else
-  mkfs.ext2 -m 1 "${root_device}"1
+  mkfs.ext2 -m 1 "${LOOP_DEV}"p1
 fi
 if [[ -v use_lvm ]]; then
   mkfs.ext4 -m 1 /dev/mapper/root_vg-root_lv
   root_uuid=$(blkid -o export /dev/mapper/root_vg-root_lv | grep -E '^UUID=')
 else
-  mkfs.ext4 -m 1 "${root_device}"2
-  root_uuid=$(blkid -o export "${root_device}"2 | grep -E '^UUID=')
+  mkfs.ext4 -m 1 "${LOOP_DEV}"p2
+  root_uuid=$(blkid -o export "${LOOP_DEV}"p2 | grep -E '^UUID=')
 fi
 
 # Mount filesystems
@@ -190,15 +194,15 @@ mkdir /target
 if [[ -v use_lvm ]]; then
   mount /dev/mapper/root_vg-root_lv /target
 else
-  mount "${root_device}"2 /target
+  mount "${LOOP_DEV}"p2 /target
 fi
 if [[ $partition_type = gpt ]]; then
   mkdir -p /target/boot/efi
-  mount "${root_device}"1 /target/boot/efi
+  mount "${LOOP_DEV}"p1 /target/boot/efi
   echo "fs0:\vmlinuz root=${root_uuid} initrd=initrd.img" > /target/boot/efi/startup.nsh
 else
   mkdir /target/boot
-  mount "${root_device}"1 /target/boot
+  mount "${LOOP_DEV}"p1 /target/boot
 fi
 
 # Debootstrap and chroot preparations
@@ -208,12 +212,12 @@ if [[ $distro = ubuntu ]]; then
     mirror=$(curl -s mirrors.ubuntu.com/mirrors.txt | head -1)
   fi
 else
-  distro_release=${distro_release:="buster"}
+  distro_release=${distro_release:="stable"}
   if [[ -v mirror ]]; then
     mirror="http://ftp.debian.org/debian/"
   fi
 fi
-debootstrap --variant=minbase "$distro_release" /target "$mirror"
+debootstrap "$distro_release" /target "$mirror"
 for fs in proc dev sys; do mount --bind /$fs /target/$fs; done
 echo "$root_uuid / ext4 rw,noatime,nodiratime 0 1" > /target/etc/fstab
 echo -e "APT::Install-Recommends no;\nAPT::Install-Suggests no;" > /target/etc/apt/apt.conf.d/90no-extra
@@ -311,3 +315,5 @@ else
   umount /target/boot
 fi
 for fs in proc dev sys ''; do umount "/target/$fs"; done
+
+umount /target
