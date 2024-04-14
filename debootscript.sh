@@ -15,7 +15,7 @@ print_usage() {
   -n <target_hostname>  hostname of target system
   -t <partition_type>   partition type to use ("gpt" or "mbr")
   -l                    use LVM
-  -d                    install debian instead of ubuntu
+  -u                    install ubuntu instead of debian
   -r <release>          distro release (defaults are focal for ubuntu and buster for debian)
   -m <url>              mirror url to use
   -u <username>         (mandatory) name of user to create
@@ -29,7 +29,7 @@ if [[ $# = 0 ]]; then
   exit 1
 fi
 
-while getopts hb:n:t:ldr:m:u:s:p: options; do
+while getopts hb:n:t:lur:m:u:s:p: options; do
   case $options in
     h)
       print_usage
@@ -47,8 +47,8 @@ while getopts hb:n:t:ldr:m:u:s:p: options; do
     l)
       use_lvm=y
       ;;
-    d)
-      distro=debian
+    u)
+      distro=ubuntu
       ;;
     r)
       distro_release=$OPTARG
@@ -114,7 +114,7 @@ if [[ -v use_lvm ]] && ! command -v pvcreate &> /dev/null; then
 fi
 
 if [[ ! -v distro ]]; then
-  distro=ubuntu
+  distro=debian
 fi
 
 if [[ ! -v target_user ]]; then
