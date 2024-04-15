@@ -347,6 +347,7 @@ chroot /target /bin/bash -O nullglob -O extglob -ec "$(declare -f chroot_actions
 # point to my 'future' var/lib/docker
 sudo bash -c 'echo "{ "data-root": "/target/var/lib/docker" }" > /etc/docker/daemon.json'
 
+systemctl restart docker
 
 docker pull hello-world
 
