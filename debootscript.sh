@@ -321,7 +321,7 @@ chroot_actions() {
 	apt install -y lxde-core chromium
 
   # install webuser
-  useradd -m -s /bin/bash webuser
+  useradd -m -s /bin/bash -G docker webuser
   echo -e "nopassword\nnopassword" | passwd webuser
 
 	sed -i 's/#autologin-user=/autologin-user=webuser/' /etc/lightdm/lightdm.conf
