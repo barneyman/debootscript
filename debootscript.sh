@@ -302,6 +302,27 @@ chroot_actions() {
     done
   fi
 
+  # get docker
+  apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  usermod -aG docker "${target_user}"
+
+  docker pull hello-world
+
+  # install lightweight desktop
+	apt install -y lxde-core chromium
+
+  # install webuser
+  useradd -m -s /bin/bash -G sudo webuser
+  echo -e "nopassword\nnopassword" | passwd webuser
+
+	sed -i 's/#autologin-user=/autologin-user=webuser/' /etc/lightdm/lightdm.conf
+	sed -i 's/#autologin-user-timeout=0/autologin-user-timeout=0/' /etc/lightdm/lightdm.conf
+	mkdir -p /home/webuser/.config/lxsession/LXDE
+	echo -e "@lxpanel --profile LXDE\nxset s off -dpms\n@pcmanfm --desktop --profile LXDE\n/usr/bin/chromium --kiosk --ignore-certificate-errors --disable-restore-session https://abc.net.au\n" > /target/home/webuser/.config/lxsession/LXDE/autostart
+	chown webuser /home/webuser/.config
+
+
+
   # Finish up
   apt-get autoremove
   apt-get clean
