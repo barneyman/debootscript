@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
 
       - run: |      
-          sudo bash debootscript.sh -b ${{ github.run_number }}.img -n primis -t mbr -r stable -u administrator -p password
+          sudo bash debootscript.sh -b ${{ github.run_number }}.img -n wibble -t mbr -r stable -u administrator -p password
 
           xz ${{ github.run_number }}.img
 
