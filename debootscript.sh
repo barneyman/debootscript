@@ -164,7 +164,7 @@ elif [[ $partition_type = mbr ]]; then
 
 fi
 
-LOOP_DEV="$(sudo losetup --show --find --partscan "$root_device")"
+LOOP_DEV="$(losetup --show --find --partscan "$root_device")"
 echo "Created ${LOOP_DEV}"
 
 
@@ -350,8 +350,8 @@ chroot /target /bin/bash -O nullglob -O extglob -ec "$(declare -f chroot_actions
 # point to my 'future' var/lib/docker
 sudo bash -c 'echo "{ "data-root": "/target/var/lib/docker" }" > /etc/docker/daemon.json'
 
+  bash -c 'echo "{ "data-root": "/target/var/lib/docker" }" > /etc/docker/daemon.json'
 systemctl restart docker
-
 docker pull hello-world
 
 
