@@ -339,13 +339,13 @@ chroot /target /bin/bash -O nullglob -O extglob -ec "$(declare -f chroot_actions
 
 # docker pull
 # preserve any existing config
-if [ -e 	$HOME/.config/docker/daemon.json ]
-then
-  mv $HOME/.config/docker/daemon.json  $HOME/.config/docker/daemon.json.old
-fi
+# if [ -e 	$HOME/.config/docker/daemon.json ]
+# then
+#   mv $HOME/.config/docker/daemon.json  $HOME/.config/docker/daemon.json.old
+# fi
 
 # point to my 'future' var/lib/docker
-cat > $HOME/.config/docker/daemon.json << EOF
+sudo cat > /etc/docker/daemon.json << EOF
 {
   "data-root": "/target/var/lib/docker"
 }
