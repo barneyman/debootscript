@@ -220,7 +220,8 @@ fi
 debootstrap "$distro_release" /target "$mirror"
 for fs in proc dev sys; do mount --bind /$fs /target/$fs; done
 echo "$root_uuid / ext4 rw,noatime,nodiratime 0 1" > /target/etc/fstab
-echo -e "APT::Install-Recommends no;\nAPT::Install-Suggests no;" > /target/etc/apt/apt.conf.d/90no-extra
+#echo -e "APT::Install-Recommends no;\nAPT::Install-Suggests no;" > /target/etc/apt/apt.conf.d/90no-extra
+echo -e "APT::Install-Suggests no;" > /target/etc/apt/apt.conf.d/90no-extra
 
 ####################
 # Chrooted actions #
@@ -316,11 +317,11 @@ chroot_actions() {
   
   usermod -aG docker "${target_user}"
 
-  # install lightweight desktop
+  # install lightweight desktop 
 	apt install -y lxde-core chromium
 
   # install webuser
-  useradd -m -s /bin/bash -G sudo webuser
+  useradd -m -s /bin/bash webuser
   echo -e "nopassword\nnopassword" | passwd webuser
 
 	sed -i 's/#autologin-user=/autologin-user=webuser/' /etc/lightdm/lightdm.conf
