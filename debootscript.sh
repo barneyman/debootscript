@@ -303,7 +303,7 @@ chroot_actions() {
   fi
 
   # get docker
-  apt install curl
+  apt install -y curl
   curl -fsSL https://get.docker.com -o get-docker.sh
 
   # and run it
