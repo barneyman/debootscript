@@ -90,11 +90,11 @@ done
 # Check necessary parameters
 
 if [[ -z $root_device ]]; then
-  echo 'Root device not set' >&2
+  echo 'Image File not set' >&2
   exit 1
 fi
 if [[ -b $root_device ]]; then
-  echo "Root block device ${root_device} exists" >&2
+  echo "Image File ${root_device} exists" >&2
   exit 1
 fi
 
