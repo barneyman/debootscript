@@ -25,10 +25,9 @@ jobs:
       - run: |      
           sudo apt update && sudo apt install -y debootstrap
 
-
           sudo bash debootscript.sh -b ${{ github.run_number }}.img -n wibble -t mbr -r stable -u administrator -p password
 
-          xz ${{ github.run_number }}.img
+          sudo xz ${{ github.run_number }}.img
 
       - uses: actions/upload-artifact@v4
         with:
