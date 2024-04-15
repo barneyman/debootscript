@@ -1,5 +1,6 @@
 name: main_build
 
+on:
   push:
     branches: [ master ]
     
@@ -27,9 +28,9 @@ jobs:
           xz ${{ github.run_number }}.img
 
       - uses: actions/upload-artifact@v4
-          with:
-              name: image-${{ github.run_number }}
-              path: ${{ github.run_number }}.img.xz
+        with:
+            name: image-${{ github.run_number }}
+            path: ${{ github.run_number }}.img.xz
 
             
 
