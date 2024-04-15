@@ -1,0 +1,36 @@
+name: main_build
+
+  push:
+    branches: [ master ]
+    
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - run: |      
+          sudo bash debootscript.sh -b ${{ github.run_number }}.img -n primis -t mbr -r stable -u administrator -p password
+
+          xz ${{ github.run_number }}.img
+
+      - uses: actions/upload-artifact@v4
+          with:
+              name: image-${{ github.run_number }}
+              path: ${{ github.run_number }}.img.xz
+
+            
+
+      
