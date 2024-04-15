@@ -295,11 +295,13 @@ chroot_actions() {
         >> /etc/netplan/interfaces.yaml
     done
   else
-    for interface in /sys/class/net/!(lo); do
-      interface=$(basename "$interface")
-      echo "auto ${interface}" >> /etc/network/interfaces
-      echo -e "iface ${interface} inet dhcp" >> /etc/network/interfaces
-    done
+    # for interface in /sys/class/net/!(lo); do
+    #   interface=$(basename "$interface")
+    #   echo "auto ${interface}" >> /etc/network/interfaces
+    #   echo -e "iface ${interface} inet dhcp" >> /etc/network/interfaces
+    # done
+
+    apt install -y  network-manager
   fi
 
   # get docker
