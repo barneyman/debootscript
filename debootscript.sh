@@ -15,8 +15,8 @@ print_usage() {
   -n <target_hostname>  hostname of target system
   -t <partition_type>   partition type to use ("gpt" or "mbr")
   -l                    use LVM
-  -u                    install ubuntu instead of debian
-  -r <release>          distro release (defaults are focal for ubuntu and buster for debian)
+  -f                    install ubuntu instead of debian
+  -r <release>          distro release (defaults are focal for ubuntu and stable for debian)
   -m <url>              mirror url to use
   -u <username>         (mandatory) name of user to create
   -s <ssh_key>          (mandatory if -p not used) install sshd and set this key for the new user
@@ -29,7 +29,7 @@ if [[ $# = 0 ]]; then
   exit 1
 fi
 
-while getopts hb:n:t:lur:m:u:s:p: options; do
+while getopts hb:n:t:lfr:m:u:s:p: options; do
   case $options in
     h)
       print_usage
@@ -47,7 +47,7 @@ while getopts hb:n:t:lur:m:u:s:p: options; do
     l)
       use_lvm=y
       ;;
-    u)
+    f)
       distro=ubuntu
       ;;
     r)
@@ -164,7 +164,7 @@ elif [[ $partition_type = mbr ]]; then
 
 fi
 
-LOOP_DEV="$(sudo losetup --show --find --partscan "$CM4_IMAGE_PATH")"
+LOOP_DEV="$(sudo losetup --show --find --partscan "$root_device")"
 echo "Created ${LOOP_DEV}"
 
 
@@ -246,9 +246,13 @@ chroot_actions() {
       /etc/kernel/postinst.d/zz-update-efistub
     chmod +x /etc/kernel/postinst.d/zz-update-efistub
   else
-    echo "grub-pc grub-pc/install_devices multiselect ${root_device}" | debconf-set-selections
+#    echo "grub-pc grub-pc/install_devices multiselect /dev/sda" | debconf-set-selections
     apt-get install -y grub-pc
+    grup-install ${LOOP_DEV}
+    update-grub
   fi
+
+
 
   # Common packages
   apt-get install -y netbase isc-dhcp-client systemd-sysv whiptail sudo initramfs-tools
@@ -302,7 +306,7 @@ chroot_actions() {
   apt-get autoremove
   apt-get clean
 }
-export root_device target_hostname use_lvm partition_type distro target_user target_password ssh_public_key
+export root_device target_hostname use_lvm partition_type distro target_user target_password ssh_public_key LOOP_DEV
 chroot /target /bin/bash -O nullglob -O extglob -ec "$(declare -f chroot_actions) && chroot_actions"
 
 ###########
@@ -317,3 +321,5 @@ fi
 for fs in proc dev sys ''; do umount "/target/$fs"; done
 
 umount /target
+
+losetup -d ${LOOP_DEV}
