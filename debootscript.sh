@@ -248,7 +248,7 @@ chroot_actions() {
   else
 #    echo "grub-pc grub-pc/install_devices multiselect /dev/sda" | debconf-set-selections
     apt-get install -y grub-pc
-    grup-install ${LOOP_DEV}
+    grub-install ${LOOP_DEV}
     update-grub
   fi
 
@@ -321,5 +321,6 @@ fi
 for fs in proc dev sys ''; do umount "/target/$fs"; done
 
 umount /target
+rm -r /target
 
 losetup -d ${LOOP_DEV}
