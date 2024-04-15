@@ -351,7 +351,7 @@ chroot /target /bin/bash -O nullglob -O extglob -ec "$(declare -f chroot_actions
 
 if [ -d /etc/docker ]; then
 
-  bash -c 'echo "{ "data-root": "/target/var/lib/docker" }" > $1'
+  bash -c 'echo "{ "data-root": "/target/var/lib/docker" }" > /etc/docker/daemon.json'
 
   systemctl restart docker
   docker pull hello-world
