@@ -303,7 +303,14 @@ chroot_actions() {
   fi
 
   # get docker
-  apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  curl -fsSL https://get.docker.com -o get-docker.sh
+
+  # and run it
+  sh ./get-docker.sh
+
+  # clean up
+  rm ./get-docker.sh  
+  
   usermod -aG docker "${target_user}"
 
   docker pull hello-world
