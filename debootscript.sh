@@ -348,13 +348,16 @@ chroot /target /bin/bash -O nullglob -O extglob -ec "$(declare -f chroot_actions
 # fi
 
 # point to my 'future' var/lib/docker
-sudo bash -c 'echo "{ "data-root": "/target/var/lib/docker" }" > /etc/docker/daemon.json'
+
+if [[ -b /etc/docker/daemon.json ]]; then
 
   bash -c 'echo "{ "data-root": "/target/var/lib/docker" }" > /etc/docker/daemon.json'
 systemctl restart docker
 docker pull hello-world
 
-
+else
+  echo could not find docker file - /etc/docker/daemon.json
+fi
 
 
 ###########
