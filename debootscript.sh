@@ -324,7 +324,7 @@ chroot_actions() {
 	sed -i 's/#autologin-user=/autologin-user=webuser/' /etc/lightdm/lightdm.conf
 	sed -i 's/#autologin-user-timeout=0/autologin-user-timeout=0/' /etc/lightdm/lightdm.conf
 	mkdir -p /home/webuser/.config/lxsession/LXDE
-	echo -e "@lxpanel --profile LXDE\nxset s off -dpms\n@pcmanfm --desktop --profile LXDE\n/usr/bin/chromium --kiosk --ignore-certificate-errors --disable-restore-session https://abc.net.au\n" > /target/home/webuser/.config/lxsession/LXDE/autostart
+	echo -e "@lxpanel --profile LXDE\nxset s off -dpms\n@pcmanfm --desktop --profile LXDE\n/usr/bin/chromium --kiosk --ignore-certificate-errors --disable-restore-session https://abc.net.au\n" > /home/webuser/.config/lxsession/LXDE/autostart
 	chown webuser /home/webuser/.config
 
 
