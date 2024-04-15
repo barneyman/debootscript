@@ -349,14 +349,17 @@ chroot /target /bin/bash -O nullglob -O extglob -ec "$(declare -f chroot_actions
 
 # point to my 'future' var/lib/docker
 
-if [[ -b /etc/docker/daemon.json ]]; then
+if [ -d /etc/docker ]; then
 
-  bash -c 'echo "{ "data-root": "/target/var/lib/docker" }" > /etc/docker/daemon.json'
+  bash -c 'echo "{ "data-root": "/target/var/lib/docker" }" > $1'
+
   systemctl restart docker
   docker pull hello-world
 
 else
-  echo could not find docker file - /etc/docker/daemon.json
+
+  echo No /etc/docker  dir!
+
 fi
 
 
@@ -371,7 +374,7 @@ else
 fi
 for fs in proc dev sys ''; do umount "/target/$fs"; done
 
-umount /target
+
 rm -r /target
 
 losetup -d ${LOOP_DEV}
