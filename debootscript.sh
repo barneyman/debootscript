@@ -313,8 +313,6 @@ chroot_actions() {
   
   usermod -aG docker "${target_user}"
 
-  docker pull hello-world
-
   # install lightweight desktop
 	apt install -y lxde-core chromium
 
@@ -329,13 +327,33 @@ chroot_actions() {
 	chown webuser /home/webuser/.config
 
 
-
+ 
   # Finish up
   apt-get autoremove
   apt-get clean
 }
 export root_device target_hostname use_lvm partition_type distro target_user target_password ssh_public_key LOOP_DEV
 chroot /target /bin/bash -O nullglob -O extglob -ec "$(declare -f chroot_actions) && chroot_actions"
+
+
+# docker pull
+# preserve any existing config
+if [ -e 	$HOME/.config/docker/daemon.json ]
+then
+  mv $HOME/.config/docker/daemon.json  $HOME/.config/docker/daemon.json.old
+fi
+
+# point to my 'future' var/lib/docker
+cat > $HOME/.config/docker/daemon.json << EOF
+{
+  "data-root": "/target/var/lib/docker"
+}
+EOF  
+
+docker pull hello-world
+
+
+
 
 ###########
 # Cleanup #
