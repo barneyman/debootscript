@@ -356,6 +356,10 @@ if [ -d /etc/docker ]; then
   systemctl restart docker
   docker pull hello-world
 
+  rm /etc/docker/daemon.json
+  systemctl restart docker
+
+
 else
 
   echo No /etc/docker  dir!
